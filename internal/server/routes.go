@@ -5,6 +5,7 @@ import (
 	"errors"
 	"task/internal/api/response"
 	"task/internal/db"
+	"task/internal/middleware"
 	"task/internal/services/user/protocol/rest"
 	"task/internal/services/user/userimpl"
 
@@ -35,6 +36,7 @@ func (s *Server) SetupRoutes() {
 	api.Post("/users/register", userHttp.RegisterUser)
 	api.Post("/users/login", userHttp.LoginUser)
 
+	api.Use(middleware.JWTProtected(s.jwtSecret))
 	api.Post("/users", userHttp.CreateUser)
 	api.Get("/users", userHttp.SearchUser)
 	api.Get("/users/:id", userHttp.GetUserByID)

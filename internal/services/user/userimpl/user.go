@@ -5,6 +5,7 @@ import (
 	"task/config"
 	"task/internal/db"
 	"task/internal/services/user"
+	"task/pkg/util/jwt"
 	util "task/pkg/util/password"
 
 	"go.uber.org/zap"
@@ -149,7 +150,13 @@ func (s *service) GetUserByEmail(ctx context.Context, cmd *user.LoginUserCommand
 		return "", user.ErrInvalidPassword
 	}
 
-	return result.UUID, nil
+	// Generate JWT token
+	token, err := jwt.GenerateToken(result.Email)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 func (s *service) RegisterUser(ctx context.Context, cmd *user.RegisterUserCommand) error {

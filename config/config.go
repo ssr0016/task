@@ -18,6 +18,7 @@ type Config struct {
 	Logger      *logger.Logger
 	DB          *sqlx.DB
 	Pagination  PaginationConfig
+	JwtSecret   string
 }
 
 func getPort() string {
@@ -43,6 +44,14 @@ func getDatabaseUrl() string {
 	return dbUrl
 }
 
+func getJwtSecret() string {
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatalf("JWT_SECRET is not set in the environment")
+	}
+	return jwtSecret
+}
+
 func Load() *Config {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file: %v\n", err)
@@ -66,6 +75,7 @@ func Load() *Config {
 		DatabaseUrl: getDatabaseUrl(),
 		Logger:      loggers,
 		DB:          dbConn,
+		JwtSecret:   getJwtSecret(),
 	}
 	cfg.Logger = loggers
 

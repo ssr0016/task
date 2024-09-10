@@ -12,11 +12,12 @@ import (
 )
 
 type Server struct {
-	app  *fiber.App
-	port string
-	db   db.DB
-	cfg  *config.Config
-	log  *logger.Logger
+	app       *fiber.App
+	port      string
+	db        db.DB
+	cfg       *config.Config
+	log       *logger.Logger
+	jwtSecret string
 }
 
 func NewServer(cfg *config.Config) *Server {
@@ -34,11 +35,12 @@ func NewServer(cfg *config.Config) *Server {
 	}
 
 	return &Server{
-		app:  app,
-		port: port,
-		db:   sqlxDB,
-		cfg:  cfg,
-		log:  cfg.Logger,
+		app:       app,
+		port:      port,
+		db:        sqlxDB,
+		cfg:       cfg,
+		log:       cfg.Logger,
+		jwtSecret: cfg.JwtSecret,
 	}
 }
 
