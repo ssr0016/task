@@ -66,6 +66,47 @@ func (s *store) create(ctx context.Context, cmd *user.CreateUserCommand) error {
 	})
 }
 
+func (s *store) registerUser(ctx context.Context, cmd *user.RegisterUserCommand, role string) error {
+	return s.db.WithTransaction(ctx, func(ctx context.Context, tx db.Tx) error {
+		rawSQL := `
+			INSERT INTO users (
+				first_name,
+				last_name,
+				email,
+				password_hash,
+				address,
+				phone_number,
+				date_of_birth,
+				status,
+				role
+			) VALUES (
+				$1, $2, $3, $4, $5, $6, $7, $8, $9
+			) RETURNING id
+		`
+
+		var id int
+
+		err := tx.QueryRow(
+			ctx,
+			rawSQL,
+			cmd.FirstName,
+			cmd.LastName,
+			cmd.Email,
+			cmd.Password,
+			cmd.Address,
+			cmd.PhoneNumber,
+			cmd.DateOfBirth,
+			cmd.Status,
+			role,
+		).Scan(&id)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
 func (s *store) getUserByID(ctx context.Context, id int) (*user.User, error) {
 	var user user.User
 

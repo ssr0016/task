@@ -97,6 +97,22 @@ type SearchUserResult struct {
 	PerPage    int     `json:"per_page"`
 }
 
+type LoginUserCommand struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type RegisterUserCommand struct {
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	Email       string `json:"email"`
+	Password    string `json:"password"`
+	Address     string `json:"address"`
+	PhoneNumber string `json:"phone_number"`
+	DateOfBirth string `json:"date_of_birth"`
+	Status      Status `json:"status"`
+}
+
 func (cmd *CreateUserCommand) Validate() error {
 	if len(cmd.FirstName) == 0 {
 		return ErrInvalidFirstName
@@ -176,6 +192,66 @@ func (cmd *UpdateUserCommand) Validate() error {
 
 	if len(cmd.Email) > 0 && !validation.IsValidEmail(cmd.Email) {
 		return ErrInvalidEmail
+	}
+
+	return nil
+}
+
+func (cmd *LoginUserCommand) Validate() error {
+	if len(cmd.Email) == 0 {
+		return ErrInvalidEmail
+	}
+
+	if len(cmd.Password) == 0 {
+		return ErrInvalidPassword
+	}
+
+	if !validation.IsValidEmail(cmd.Email) {
+		return ErrInvalidEmail
+	}
+
+	if !util.IsValidPassword(cmd.Password) {
+		return ErrInvalidPassword
+	}
+
+	return nil
+}
+
+func (cmd *RegisterUserCommand) Validate() error {
+	if len(cmd.FirstName) == 0 {
+		return ErrInvalidFirstName
+	}
+
+	if len(cmd.FirstName) <= 2 {
+		return ErrInvalidFirstName
+	}
+
+	if len(cmd.LastName) == 0 {
+		return ErrInvalidLastName
+	}
+
+	if len(cmd.LastName) <= 2 {
+		return ErrInvalidLastName
+	}
+
+	if len(cmd.Email) == 0 || !validation.IsValidEmail(cmd.Email) {
+		return ErrInvalidEmail
+	}
+
+	if len(cmd.Password) == 0 || !util.IsValidPassword(cmd.Password) {
+		return ErrInvalidPassword
+	}
+
+	if len(cmd.Address) == 0 {
+		return ErrInvalidAddress
+	}
+
+	if len(cmd.PhoneNumber) == 0 {
+		return ErrInvalidPhoneNumber
+	}
+
+	if len(cmd.DateOfBirth) == 0 {
+		return ErrInvalidDateOfBirth
 	}
 
 	return nil

@@ -96,3 +96,46 @@ func (h *userHandler) DeleteUser(ctx *fiber.Ctx) error {
 		"message": "user deleted successfully!",
 	})
 }
+
+func (h *userHandler) LoginUser(ctx *fiber.Ctx) error {
+	var cmd user.LoginUserCommand
+
+	if err := ctx.BodyParser(&cmd); err != nil {
+		return errors.ErrorBadRequest(err)
+	}
+
+	if err := cmd.Validate(); err != nil {
+		return errors.ErrorBadRequest(err)
+	}
+	result, err := h.s.GetUserByEmail(ctx.Context(), &cmd)
+	if err != nil {
+		if err == user.ErrUserNotFound || err == user.ErrInvalidPassword {
+			return errors.ErrorUnauthorized(err, "Invalid email or password")
+		}
+		return errors.ErrorInternalServerError(err)
+	}
+
+	return response.Ok(ctx, fiber.Map{
+		"login user": result,
+	})
+}
+
+func (h *userHandler) RegisterUser(ctx *fiber.Ctx) error {
+	var cmd user.RegisterUserCommand
+
+	if err := ctx.BodyParser(&cmd); err != nil {
+		return errors.ErrorBadRequest(err)
+	}
+
+	if err := cmd.Validate(); err != nil {
+		return errors.ErrorBadRequest(err)
+	}
+
+	if err := h.s.RegisterUser(ctx.Context(), &cmd); err != nil {
+		return errors.ErrorInternalServerError(err)
+	}
+
+	return response.Created(ctx, fiber.Map{
+		"user": cmd,
+	})
+}
