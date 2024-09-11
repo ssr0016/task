@@ -361,3 +361,30 @@ func (s *store) getCount(ctx context.Context, sql bytes.Buffer, whereParams []in
 
 	return count, nil
 }
+
+func (s *store) getUserByRole(ctx context.Context, roleID int) ([]*user.User, error) {
+	var users []*user.User
+
+	rawSQL := `
+		SELECT
+			id,
+			uuid,
+			first_name,
+			last_name,
+			email,
+			address,
+			phone_number,
+			date_of_birth,
+			role,
+			status
+		FROM users
+		WHERE role = $1
+	`
+
+	// Query the database and scan the results into the users slice
+	if err := s.db.Select(ctx, &users, rawSQL, roleID); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

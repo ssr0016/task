@@ -4,6 +4,8 @@ import (
 	"strings"
 	"task/pkg/util/jwt"
 
+	"task/internal/services/accesscontrol"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -32,6 +34,36 @@ func JWTProtected(secret string) fiber.Handler {
 		}
 
 		c.Locals("userID", claims.UserID)
+		c.Locals("role", claims.Role)
+
+		return c.Next()
+	}
+}
+
+// Middleware to check if the user has the required role
+func RequireRole(requiredRole string) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		role := c.Locals("role").(string) // Get the user's role from context
+
+		if role != requiredRole {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error": "Access denied. Insufficient permissions.",
+			})
+		}
+		return c.Next()
+	}
+}
+
+// RequirePermission checks if the user has the required permission
+func RequirePermission(permission string) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		role := c.Locals("role").(string)
+
+		if !accesscontrol.HasPermission(role, permission) {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error": "You do not have permission to access this resource",
+			})
+		}
 
 		return c.Next()
 	}

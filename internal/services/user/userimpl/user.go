@@ -151,7 +151,7 @@ func (s *service) GetUserByEmail(ctx context.Context, cmd *user.LoginUserCommand
 	}
 
 	// Generate JWT token
-	token, err := jwt.GenerateToken(result.Email)
+	token, err := jwt.GenerateToken(result.Email, result.Role)
 	if err != nil {
 		return "", err
 	}

@@ -6,11 +6,20 @@ import (
 	"task/internal/api/response"
 	"task/internal/db"
 	"task/internal/middleware"
-	"task/internal/services/accesscontrol/role/roleimpl"
 	"task/internal/services/protocol/rest"
 	"task/internal/services/user/userimpl"
 
 	"github.com/gofiber/fiber/v2"
+)
+
+var (
+	requireCreateUser = middleware.RequirePermission("create")
+	requireReadUser   = middleware.RequirePermission("read")
+	requireUpdateUser = middleware.RequirePermission("update")
+	requireDeleteUser = middleware.RequirePermission("delete")
+
+	superuser   = middleware.RequireRole("superuser")
+	defaultuser = middleware.RequireRole("user")
 )
 
 func healthCheck(db db.DB) fiber.Handler {
@@ -38,17 +47,10 @@ func (s *Server) SetupRoutes() {
 	api.Post("/users/login", userHttp.LoginUser)
 
 	api.Use(middleware.JWTProtected(s.jwtSecret))
-	api.Post("/users", userHttp.CreateUser)
-	api.Get("/users", userHttp.SearchUser)
-	api.Get("/users/:id", userHttp.GetUserByID)
-	api.Put("/users/:id", userHttp.UpdateUser)
-	api.Delete("/users/:id", userHttp.DeleteUser)
+	api.Post("/users", superuser, requireCreateUser, userHttp.CreateUser)
+	api.Get("/users", superuser, defaultuser, requireReadUser, userHttp.SearchUser)
+	api.Get("/users/:id", superuser, defaultuser, requireReadUser, userHttp.GetUserByID)
+	api.Put("/users/:id", superuser, requireUpdateUser, userHttp.UpdateUser)
+	api.Delete("/users/:id", superuser, requireDeleteUser, userHttp.DeleteUser)
 
-	// Role Routes
-	role := roleimpl.NewService(s.db, s.cfg)
-	roleHttp := rest.NewRoleHandler(&role)
-	api.Post("/roles", roleHttp.CreateRole)
-	api.Get("/roles/:id", roleHttp.GetRoleByID)
-	api.Get("/roles", roleHttp.GetRoles)
-	api.Delete("/roles/:id", roleHttp.DeleteRole)
 }
