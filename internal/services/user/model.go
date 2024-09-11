@@ -35,11 +35,15 @@ const (
 const (
 	RoleUser      = "user"
 	RoleSuperUser = "superuser"
+	RoleHR        = "hr"
+	RoleManager   = "manager"
 )
 
 var validRoles = map[string]bool{
 	RoleUser:      true,
 	RoleSuperUser: true,
+	RoleHR:        true,
+	RoleManager:   true,
 }
 
 // IsValidRole checks if a role is valid.

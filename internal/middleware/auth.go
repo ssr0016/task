@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// Middleware to check if the user has a valid JWT
 func JWTProtected(secret string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
@@ -41,15 +42,25 @@ func JWTProtected(secret string) fiber.Handler {
 }
 
 // Middleware to check if the user has the required role
-func RequireRole(requiredRole string) fiber.Handler {
+func RequireRole(requiredRoles ...string) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		role := c.Locals("role").(string) // Get the user's role from context
 
-		if role != requiredRole {
+		// Check if the user's role is in the list of allowed roles
+		roleAllowed := false
+		for _, allowedRole := range requiredRoles {
+			if role == allowedRole {
+				roleAllowed = true
+				break
+			}
+		}
+
+		if !roleAllowed {
 			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
 				"error": "Access denied. Insufficient permissions.",
 			})
 		}
+
 		return c.Next()
 	}
 }

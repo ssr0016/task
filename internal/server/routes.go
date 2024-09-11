@@ -19,7 +19,7 @@ var (
 	requireDeleteUser = middleware.RequirePermission("delete")
 
 	superuser   = middleware.RequireRole("superuser")
-	defaultuser = middleware.RequireRole("user")
+	defaultuser = middleware.RequireRole("user", "superuser")
 )
 
 func healthCheck(db db.DB) fiber.Handler {
@@ -48,8 +48,8 @@ func (s *Server) SetupRoutes() {
 
 	api.Use(middleware.JWTProtected(s.jwtSecret))
 	api.Post("/users", superuser, requireCreateUser, userHttp.CreateUser)
-	api.Get("/users", superuser, defaultuser, requireReadUser, userHttp.SearchUser)
-	api.Get("/users/:id", superuser, defaultuser, requireReadUser, userHttp.GetUserByID)
+	api.Get("/users", defaultuser, requireReadUser, userHttp.SearchUser)
+	api.Get("/users/:id", defaultuser, requireReadUser, userHttp.GetUserByID)
 	api.Put("/users/:id", superuser, requireUpdateUser, userHttp.UpdateUser)
 	api.Delete("/users/:id", superuser, requireDeleteUser, userHttp.DeleteUser)
 
