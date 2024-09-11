@@ -6,7 +6,8 @@ import (
 	"task/internal/api/response"
 	"task/internal/db"
 	"task/internal/middleware"
-	"task/internal/services/user/protocol/rest"
+	"task/internal/services/accesscontrol/role/roleimpl"
+	"task/internal/services/protocol/rest"
 	"task/internal/services/user/userimpl"
 
 	"github.com/gofiber/fiber/v2"
@@ -42,4 +43,12 @@ func (s *Server) SetupRoutes() {
 	api.Get("/users/:id", userHttp.GetUserByID)
 	api.Put("/users/:id", userHttp.UpdateUser)
 	api.Delete("/users/:id", userHttp.DeleteUser)
+
+	// Role Routes
+	role := roleimpl.NewService(s.db, s.cfg)
+	roleHttp := rest.NewRoleHandler(&role)
+	api.Post("/roles", roleHttp.CreateRole)
+	api.Get("/roles/:id", roleHttp.GetRoleByID)
+	api.Get("/roles", roleHttp.GetRoles)
+	api.Delete("/roles/:id", roleHttp.DeleteRole)
 }

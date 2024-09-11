@@ -71,7 +71,7 @@ func ErrorInternalServerError(err error) error {
 	)
 }
 
-func ErrorForbidder(err error) error {
+func ErrorForbidden(err error) error {
 	return NewApiError(
 		err,
 		fiber.StatusForbidden,
