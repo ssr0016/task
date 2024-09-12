@@ -1,12 +1,14 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"task/internal/logger"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -19,6 +21,7 @@ type Config struct {
 	DB          *sqlx.DB
 	Pagination  PaginationConfig
 	JwtSecret   string
+	RedisClient *redis.Client
 }
 
 func getPort() string {
@@ -65,9 +68,23 @@ func Load() *Config {
 		log.Fatalf("Error initializing logger: %v\n", err)
 	}
 
+	// Initialize Database
 	dbConn, err := sqlx.Connect("postgres", getDatabaseUrl())
 	if err != nil {
 		log.Fatalf("Error connecting to database: %v\n", err)
+	}
+
+	// Initialize Redis Client
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT")),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       0,
+	})
+
+	// Verify Redis connection
+	_, err = redisClient.Ping(context.Background()).Result()
+	if err != nil {
+		log.Fatalf("Error connecting to Redis: %v\n", err)
 	}
 
 	cfg := &Config{
@@ -76,6 +93,7 @@ func Load() *Config {
 		Logger:      loggers,
 		DB:          dbConn,
 		JwtSecret:   getJwtSecret(),
+		RedisClient: redisClient,
 	}
 	cfg.Logger = loggers
 

@@ -7,23 +7,27 @@ import (
 	"task/internal/services/user"
 	"task/pkg/util/jwt"
 	util "task/pkg/util/password"
+	"time"
 
+	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 )
 
 type service struct {
-	store *store
-	cfg   *config.Config
-	log   *zap.Logger
-	db    db.DB
+	store       *store
+	cfg         *config.Config
+	log         *zap.Logger
+	db          db.DB
+	redisClient *redis.Client
 }
 
 func NewService(db db.DB, cfg *config.Config) service {
 	return service{
-		store: NewStore(db),
-		cfg:   cfg,
-		db:    db,
-		log:   zap.L().Named("user.service"),
+		store:       NewStore(db),
+		cfg:         cfg,
+		db:          db,
+		redisClient: cfg.RedisClient,
+		log:         zap.L().Named("user.service"),
 	}
 }
 
@@ -188,4 +192,27 @@ func (s *service) RegisterUser(ctx context.Context, cmd *user.RegisterUserComman
 		return nil
 	})
 
+}
+
+// InvalidateToken adds the token to a blacklist using Redis
+func (s *service) InvalidateToken(ctx context.Context, token string) error {
+	expiration := 24 * time.Hour // Token expiry time
+	err := s.redisClient.Set(ctx, token, "blacklisted", expiration).Err()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// IsTokenBlacklisted checks if a token is blacklisted in Redis
+func (s *service) IsTokenBlacklisted(ctx context.Context, token string) (bool, error) {
+	_, err := s.redisClient.Get(ctx, token).Result()
+	if err == redis.Nil {
+		// Token not found in blacklist
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

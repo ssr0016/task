@@ -46,11 +46,14 @@ func (s *Server) SetupRoutes() {
 	api.Post("/users/register", userHttp.RegisterUser)
 	api.Post("/users/login", userHttp.LoginUser)
 
-	api.Use(middleware.JWTProtected(s.jwtSecret))
+	api.Use(middleware.JWTProtected(s.jwtSecret, &user))
 	api.Post("/users", reqOnlyBySuperuser, requireCreateUser, userHttp.CreateUser)
 	api.Get("/users", reqBothUserAndSuperuser, requireReadUser, userHttp.SearchUser)
 	api.Get("/users/:id", reqBothUserAndSuperuser, requireReadUser, userHttp.GetUserByID)
 	api.Put("/users/:id", reqOnlyBySuperuser, requireUpdateUser, userHttp.UpdateUser)
 	api.Delete("/users/:id", reqOnlyBySuperuser, requireDeleteUser, userHttp.DeleteUser)
+
+	//
+	api.Post("/users/logout", reqBothUserAndSuperuser, userHttp.LogoutUser)
 
 }

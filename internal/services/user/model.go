@@ -116,6 +116,10 @@ type LoginUserCommand struct {
 	Password string `json:"password"`
 }
 
+type LogutUserCommand struct {
+	Token string `json:"token"`
+}
+
 type RegisterUserCommand struct {
 	FirstName   string `json:"first_name"`
 	LastName    string `json:"last_name"`

@@ -139,3 +139,27 @@ func (h *userHandler) RegisterUser(ctx *fiber.Ctx) error {
 		"user": cmd,
 	})
 }
+
+func (h *userHandler) LogoutUser(ctx *fiber.Ctx) error {
+	token := ctx.Get("Authorization")
+	if token == "" {
+		return &fiber.Error{
+			Code:    fiber.StatusBadRequest,
+			Message: "No token provided",
+		}
+	}
+
+	// Remove "Bearer " prefix if present
+	if len(token) > 7 && token[:7] == "Bearer " {
+		token = token[7:]
+	}
+
+	err := h.s.InvalidateToken(ctx.Context(), token)
+	if err != nil {
+		return errors.ErrorInternalServerError(err)
+	}
+
+	return response.Ok(ctx, fiber.Map{
+		"message": "user logged out successfully!",
+	})
+}

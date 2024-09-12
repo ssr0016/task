@@ -10,4 +10,8 @@ type Service interface {
 	SearchUser(ctx context.Context, query *SearchUserQuery) (*SearchUserResult, error)
 	DeleteUser(ctx context.Context, id int) error
 	GetUserByEmail(ctx context.Context, cmd *LoginUserCommand) (string, error)
+
+	// For logout
+	InvalidateToken(ctx context.Context, token string) error
+	IsTokenBlacklisted(ctx context.Context, token string) (bool, error)
 }
