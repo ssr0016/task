@@ -5,6 +5,7 @@ import (
 	"task/config"
 	"task/internal/db"
 	"task/internal/services/department"
+	"task/internal/services/user"
 
 	"go.uber.org/zap"
 )
@@ -114,6 +115,29 @@ func (s *service) SearchDepartment(ctx context.Context, query *department.Search
 
 	result.PerPage = query.PerPage
 	result.Page = query.Page
+
+	return result, nil
+}
+
+func (s *service) AssignUserToDepartment(ctx context.Context, cmd *department.AssignUserToDepartmentCommand) error {
+	return s.db.WithTransaction(ctx, func(ctx context.Context, tx db.Tx) error {
+		err := s.store.assignUserToDepartment(ctx, cmd)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+func (s *service) GetUsersByDepartment(ctx context.Context, departmentID int) ([]*user.UserDepartmentDTO, error) {
+	result, err := s.store.getUsersByDepartment(ctx, departmentID)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(result) == 0 {
+		return nil, department.ErrDepartmentNotFound
+	}
 
 	return result, nil
 }

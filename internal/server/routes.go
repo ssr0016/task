@@ -66,4 +66,8 @@ func (s *Server) SetupRoutes() {
 	api.Get("/departments/:id", reqBothUserAndSuperuser, requireReadUser, departmentHttp.GetDepartmentByID)
 	api.Put("/departments/:id", reqOnlyBySuperuser, requireUpdateUser, departmentHttp.UpdateDepartment)
 	api.Delete("/departments/:id", reqOnlyBySuperuser, requireDeleteUser, departmentHttp.DeleteDepartment)
+
+	api.Post("/users/assigned/departments", reqOnlyBySuperuser, requireUpdateUser, departmentHttp.AssignUserToDepartment)
+	api.Get("/users/assigned/:id/departments", reqBothUserAndSuperuser, requireReadUser, departmentHttp.GetUsersByDepartment)
+
 }

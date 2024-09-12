@@ -67,6 +67,25 @@ type User struct {
 	UpdatedAt    time.Time `db:"updated_at" json:"updated_at"` // Timestamp for updates
 }
 
+type UserDepartmentDTO struct {
+	ID           int       `db:"id" json:"id"`
+	UUID         string    `db:"uuid" json:"uuid"`
+	FirstName    string    `db:"first_name" json:"first_name"`
+	LastName     string    `db:"last_name" json:"last_name"`
+	Email        string    `db:"email" json:"email"`
+	PasswordHash string    `db:"password_hash" json:"-"`
+	Address      string    `db:"address" json:"address"`
+	PhoneNumber  string    `db:"phone_number" json:"phone_number"`
+	DateOfBirth  string    `db:"date_of_birth" json:"date_of_birth"`
+	Role         string    `db:"role" json:"role"`
+	Status       Status    `db:"status" json:"status"`
+	CreatedAt    time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt    time.Time `db:"updated_at" json:"updated_at"`
+
+	DepartmentID   int    `db:"department_id" json:"department_id"`
+	DepartmentName string `db:"department_name" json:"department_name"`
+}
+
 type CreateUserCommand struct {
 	FirstName   string `json:"first_name"`
 	LastName    string `json:"last_name"`

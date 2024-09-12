@@ -9,6 +9,7 @@ import (
 	"strings"
 	"task/internal/db"
 	"task/internal/services/department"
+	"task/internal/services/user"
 
 	"go.uber.org/zap"
 )
@@ -218,4 +219,58 @@ func (s *store) getCount(ctx context.Context, sql bytes.Buffer, whereParams []in
 	}
 
 	return count, nil
+}
+
+// Assign user to specific department
+func (s *store) assignUserToDepartment(ctx context.Context, cmd *department.AssignUserToDepartmentCommand) error {
+	return s.db.WithTransaction(ctx, func(ctx context.Context, tx db.Tx) error {
+		rawSQL := `
+			UPDATE users
+			SET department_id = $1
+			WHERE id = $2
+		`
+		_, err := tx.Exec(ctx, rawSQL, cmd.DepartmentID, cmd.UserID)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func (s *store) getUsersByDepartment(ctx context.Context, departmentID int) ([]*user.UserDepartmentDTO, error) {
+	var users []*user.UserDepartmentDTO
+
+	rawSQL := `
+		SELECT
+			u.id,
+			u.uuid,
+			u.first_name,
+			u.last_name,
+			u.email,
+			u.password_hash,
+			u.address,
+			u.phone_number,
+			u.date_of_birth,
+			u.role,
+			u.status,
+			u.created_at,
+			u.updated_at,
+			u.department_id,
+			d.name AS department_name
+		FROM
+			users u
+		LEFT JOIN
+			departments d
+		ON u.department_id = d.id
+		WHERE
+			u.department_id = $1
+	`
+
+	err := s.db.Select(ctx, &users, rawSQL, departmentID)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }

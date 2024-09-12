@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"strconv"
 	"task/internal/api/errors"
 	"task/internal/api/response"
 	"task/internal/services/department"
@@ -97,5 +98,33 @@ func (h *departmentHandler) DeleteDepartment(ctx *fiber.Ctx) error {
 
 	return response.Ok(ctx, fiber.Map{
 		"department deleted successfully!": id,
+	})
+}
+
+func (h *departmentHandler) AssignUserToDepartment(ctx *fiber.Ctx) error {
+	var cmd department.AssignUserToDepartmentCommand
+
+	if err := ctx.BodyParser(&cmd); err != nil {
+		return errors.ErrorBadRequest(err)
+	}
+
+	if err := h.s.AssignUserToDepartment(ctx.Context(), &cmd); err != nil {
+		return errors.ErrorInternalServerError(err)
+	}
+	return response.Ok(ctx, fiber.Map{
+		"department assigned to user successfully!": cmd,
+	})
+}
+
+func (h *departmentHandler) GetUsersByDepartment(ctx *fiber.Ctx) error {
+	id, _ := strconv.Atoi(ctx.Params("id"))
+
+	result, err := h.s.GetUsersByDepartment(ctx.Context(), id)
+	if err != nil {
+		return errors.ErrorInternalServerError(err)
+	}
+
+	return response.Ok(ctx, fiber.Map{
+		"users": result,
 	})
 }

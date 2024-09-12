@@ -8,6 +8,7 @@ var (
 	ErrDepartmentAlreadyExists = errors.New("department.already-exists", "Department already exists")
 	ErrDepartmentNotFound      = errors.New("department.not-found", "Department not found")
 	ErrInvalidDepartmentName   = errors.New("department.invalid-name", "Invalid department name")
+	ErrUserDepartmentNotFound  = errors.New("user.department-not-found", "User department not found")
 )
 
 type Department struct {
@@ -41,6 +42,11 @@ type SearchDepartmentResult struct {
 	Department []*Department `json:"result"`
 	Page       int           `json:"page"`
 	PerPage    int           `json:"per_page"`
+}
+
+type AssignUserToDepartmentCommand struct {
+	UserID       int `json:"user_id"`
+	DepartmentID int `json:"department_id"`
 }
 
 func (cmd *CreateDepartmentCommand) Validate() error {
