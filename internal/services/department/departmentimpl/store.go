@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"task/internal/db"
 	"task/internal/services/department"
@@ -291,4 +292,79 @@ func (s *store) removeUserFromDepartment(ctx context.Context, userID int) error 
 
 		return nil
 	})
+}
+
+func (s *store) searchAllUsersByDepartment(ctx context.Context, query *department.SearchAllUsersByDepartmentQuery) (*department.SearchAllUsersByDepartmentResult, error) {
+	var (
+		result = &department.SearchAllUsersByDepartmentResult{
+			User: make([]*user.UserDepartmentDTO, 0),
+		}
+		sql            bytes.Buffer
+		whereCondition = make([]string, 0)
+		whereParams    = make([]interface{}, 0)
+		paramIndex     = 1
+	)
+
+	sql.WriteString(`
+		SELECT
+			u.id,
+			u.uuid,
+			u.first_name,
+			u.last_name,
+			u.email,
+			u.password_hash,
+			u.address,
+			u.phone_number,
+			u.date_of_birth,
+			u.role,
+			u.status,
+			u.created_at,
+			u.updated_at,
+			u.department_id,
+			d.name AS department_name
+		FROM
+			users u
+		LEFT JOIN
+			departments d
+		ON u.department_id = d.id
+		WHERE 1=1
+	`)
+
+	if len(query.DepartmentName) > 0 {
+		whereCondition = append(whereCondition, "d.name ILIKE $"+strconv.Itoa(paramIndex))
+		whereParams = append(whereParams, "%"+query.DepartmentName+"%")
+		paramIndex++
+	}
+
+	if len(query.Role) > 0 {
+		whereCondition = append(whereCondition, "u.role = $"+strconv.Itoa(paramIndex))
+		whereParams = append(whereParams, query.Role)
+		paramIndex++
+	}
+
+	if len(whereCondition) > 0 {
+		sql.WriteString(" AND " + strings.Join(whereCondition, " AND "))
+	}
+
+	sql.WriteString(" ORDER BY u.id DESC")
+
+	count, err := s.getCount(ctx, sql, whereParams)
+	if err != nil {
+		return nil, err
+	}
+
+	if query.PerPage > 0 {
+		offset := query.PerPage * (query.Page - 1)
+		sql.WriteString(fmt.Sprintf(" LIMIT $%d OFFSET $%d", paramIndex, paramIndex+1))
+		whereParams = append(whereParams, query.PerPage, offset)
+	}
+
+	err = s.db.Select(ctx, &result.User, sql.String(), whereParams...)
+	if err != nil {
+		return nil, err
+	}
+
+	result.TotalCount = count
+
+	return result, nil
 }

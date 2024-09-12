@@ -2,6 +2,7 @@ package department
 
 import (
 	"task/internal/api/errors"
+	"task/internal/services/user"
 )
 
 var (
@@ -47,6 +48,29 @@ type SearchDepartmentResult struct {
 type AssignUserToDepartmentCommand struct {
 	UserID       int `json:"user_id"`
 	DepartmentID int `json:"department_id"`
+}
+
+type SearchAllUsersByDepartmentQuery struct {
+	FirstName      string      `query:"first_name"`
+	LastName       string      `query:"last_name"`
+	Email          string      `query:"email"`
+	PasswordHash   string      `query:"-"`
+	Address        string      `query:"address"`
+	PhoneNumber    string      `query:"phone_number"`
+	DateOfBirth    string      `query:"date_of_birth"`
+	Role           string      `query:"role"`
+	Status         user.Status `query:"status"`
+	DepartmentID   int         `query:"department_id"`
+	DepartmentName string      `query:"department_name"`
+	Page           int         `query:"page"`
+	PerPage        int         `query:"per_page"`
+}
+
+type SearchAllUsersByDepartmentResult struct {
+	TotalCount int                       `json:"total_count"`
+	User       []*user.UserDepartmentDTO `json:"result"`
+	Page       int                       `json:"page"`
+	PerPage    int                       `json:"per_page"`
 }
 
 func (cmd *CreateDepartmentCommand) Validate() error {

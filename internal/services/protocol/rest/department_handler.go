@@ -140,3 +140,20 @@ func (h *departmentHandler) RemoveUserFromDepartment(ctx *fiber.Ctx) error {
 		"user removed from department successfully!": userID,
 	})
 }
+
+func (h *departmentHandler) SearchAllUsersByDepartment(ctx *fiber.Ctx) error {
+	var query department.SearchAllUsersByDepartmentQuery
+
+	if err := ctx.QueryParser(&query); err != nil {
+		return errors.ErrorBadRequest(err)
+	}
+
+	result, err := h.s.SearchAllUsersByDepartment(ctx.Context(), &query)
+	if err != nil {
+		return errors.ErrorInternalServerError(err)
+	}
+
+	return response.Ok(ctx, fiber.Map{
+		"users": result,
+	})
+}

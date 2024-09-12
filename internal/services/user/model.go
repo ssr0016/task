@@ -82,8 +82,8 @@ type UserDepartmentDTO struct {
 	CreatedAt    time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt    time.Time `db:"updated_at" json:"updated_at"`
 
-	DepartmentID   int    `db:"department_id" json:"department_id"`
-	DepartmentName string `db:"department_name" json:"department_name"`
+	DepartmentID   *int    `db:"department_id" json:"department_id"`
+	DepartmentName *string `db:"department_name" json:"department_name"`
 }
 
 type CreateUserCommand struct {

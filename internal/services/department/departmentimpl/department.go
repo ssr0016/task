@@ -150,3 +150,23 @@ func (s *service) RemoveUserFromDepartment(ctx context.Context, userID int) erro
 
 	return nil
 }
+
+func (s *service) SearchAllUsersByDepartment(ctx context.Context, query *department.SearchAllUsersByDepartmentQuery) (*department.SearchAllUsersByDepartmentResult, error) {
+	if query.Page <= 0 {
+		query.Page = s.cfg.Pagination.Page
+	}
+
+	if query.PerPage <= 0 {
+		query.PerPage = s.cfg.Pagination.PageLimit
+	}
+
+	result, err := s.store.searchAllUsersByDepartment(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	result.PerPage = query.PerPage
+	result.Page = query.Page
+
+	return result, nil
+}

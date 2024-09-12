@@ -16,4 +16,5 @@ type Service interface {
 	AssignUserToDepartment(ctx context.Context, cmd *AssignUserToDepartmentCommand) error
 	GetUsersByDepartment(ctx context.Context, departmentID int) ([]*user.UserDepartmentDTO, error)
 	RemoveUserFromDepartment(ctx context.Context, userID int) error
+	SearchAllUsersByDepartment(ctx context.Context, query *SearchAllUsersByDepartmentQuery) (*SearchAllUsersByDepartmentResult, error)
 }
