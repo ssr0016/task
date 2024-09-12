@@ -5,8 +5,8 @@ import (
 	"strings"
 	"task/pkg/util/jwt"
 
-	"task/internal/services/accesscontrol"
-	"task/internal/services/user"
+	"task/internal/identity/accesscontrol"
+	"task/internal/identity/user"
 
 	"github.com/gofiber/fiber/v2"
 )

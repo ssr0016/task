@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 	"task/internal/db"
-	"task/internal/services/user"
+	"task/internal/identity/user"
 
 	"go.uber.org/zap"
 )

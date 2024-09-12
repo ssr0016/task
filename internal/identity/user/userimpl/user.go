@@ -4,7 +4,7 @@ import (
 	"context"
 	"task/config"
 	"task/internal/db"
-	"task/internal/services/user"
+	"task/internal/identity/user"
 	"task/pkg/util/jwt"
 	util "task/pkg/util/password"
 	"time"

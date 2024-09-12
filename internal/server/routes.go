@@ -5,10 +5,10 @@ import (
 	"errors"
 	"task/internal/api/response"
 	"task/internal/db"
+	"task/internal/identity/department/departmentimpl"
+	"task/internal/identity/protocol/rest"
+	"task/internal/identity/user/userimpl"
 	"task/internal/middleware"
-	"task/internal/services/department/departmentimpl"
-	"task/internal/services/protocol/rest"
-	"task/internal/services/user/userimpl"
 
 	"github.com/gofiber/fiber/v2"
 )

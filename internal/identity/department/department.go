@@ -2,7 +2,7 @@ package department
 
 import (
 	"context"
-	"task/internal/services/user"
+	"task/internal/identity/user"
 )
 
 type Service interface {

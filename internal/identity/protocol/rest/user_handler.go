@@ -3,7 +3,7 @@ package rest
 import (
 	"task/internal/api/errors"
 	"task/internal/api/response"
-	"task/internal/services/user"
+	"task/internal/identity/user"
 
 	"github.com/gofiber/fiber/v2"
 )

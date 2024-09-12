@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"task/internal/db"
-	"task/internal/services/department"
-	"task/internal/services/user"
+	"task/internal/identity/department"
+	"task/internal/identity/user"
 
 	"go.uber.org/zap"
 )

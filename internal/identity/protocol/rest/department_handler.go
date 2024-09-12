@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"task/internal/api/errors"
 	"task/internal/api/response"
-	"task/internal/services/department"
+	"task/internal/identity/department"
 
 	"github.com/gofiber/fiber/v2"
 )

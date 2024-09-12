@@ -2,7 +2,7 @@ package department
 
 import (
 	"task/internal/api/errors"
-	"task/internal/services/user"
+	"task/internal/identity/user"
 )
 
 var (
