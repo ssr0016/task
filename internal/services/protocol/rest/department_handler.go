@@ -128,3 +128,15 @@ func (h *departmentHandler) GetUsersByDepartment(ctx *fiber.Ctx) error {
 		"users": result,
 	})
 }
+
+func (h *departmentHandler) RemoveUserFromDepartment(ctx *fiber.Ctx) error {
+	userID, _ := strconv.Atoi(ctx.Params("id"))
+
+	if err := h.s.RemoveUserFromDepartment(ctx.Context(), userID); err != nil {
+		return errors.ErrorInternalServerError(err)
+	}
+
+	return response.Ok(ctx, fiber.Map{
+		"user removed from department successfully!": userID,
+	})
+}

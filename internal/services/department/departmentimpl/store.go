@@ -274,3 +274,21 @@ func (s *store) getUsersByDepartment(ctx context.Context, departmentID int) ([]*
 
 	return users, nil
 }
+
+// RemoveUserFromDepartment removes the department association from the user by setting department_id to NULL
+func (s *store) removeUserFromDepartment(ctx context.Context, userID int) error {
+	return s.db.WithTransaction(ctx, func(ctx context.Context, tx db.Tx) error {
+		rawSQL := `
+			UPDATE users
+			SET department_id = NULL
+			WHERE id = $1	
+		`
+
+		_, err := tx.Exec(ctx, rawSQL, userID)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+}

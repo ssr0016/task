@@ -15,4 +15,5 @@ type Service interface {
 	// Assign user to specific department
 	AssignUserToDepartment(ctx context.Context, cmd *AssignUserToDepartmentCommand) error
 	GetUsersByDepartment(ctx context.Context, departmentID int) ([]*user.UserDepartmentDTO, error)
+	RemoveUserFromDepartment(ctx context.Context, userID int) error
 }

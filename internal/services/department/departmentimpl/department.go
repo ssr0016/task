@@ -141,3 +141,12 @@ func (s *service) GetUsersByDepartment(ctx context.Context, departmentID int) ([
 
 	return result, nil
 }
+
+func (s *service) RemoveUserFromDepartment(ctx context.Context, userID int) error {
+	err := s.store.removeUserFromDepartment(ctx, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
