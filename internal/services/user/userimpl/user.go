@@ -21,8 +21,8 @@ type service struct {
 	redisClient *redis.Client
 }
 
-func NewService(db db.DB, cfg *config.Config) service {
-	return service{
+func NewService(db db.DB, cfg *config.Config) *service {
+	return &service{
 		store:       NewStore(db),
 		cfg:         cfg,
 		db:          db,

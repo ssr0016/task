@@ -6,6 +6,7 @@ import (
 	"task/internal/api/response"
 	"task/internal/db"
 	"task/internal/middleware"
+	"task/internal/services/department/departmentimpl"
 	"task/internal/services/protocol/rest"
 	"task/internal/services/user/userimpl"
 
@@ -41,19 +42,28 @@ func (s *Server) SetupRoutes() {
 
 	// User Routes
 	user := userimpl.NewService(s.db, s.cfg)
-	userHttp := rest.NewUserHandler(&user)
+	userHttp := rest.NewUserHandler(user)
 
 	api.Post("/users/register", userHttp.RegisterUser)
 	api.Post("/users/login", userHttp.LoginUser)
 
-	api.Use(middleware.JWTProtected(s.jwtSecret, &user))
+	api.Use(middleware.JWTProtected(s.jwtSecret, user))
 	api.Post("/users", reqOnlyBySuperuser, requireCreateUser, userHttp.CreateUser)
 	api.Get("/users", reqBothUserAndSuperuser, requireReadUser, userHttp.SearchUser)
 	api.Get("/users/:id", reqBothUserAndSuperuser, requireReadUser, userHttp.GetUserByID)
 	api.Put("/users/:id", reqOnlyBySuperuser, requireUpdateUser, userHttp.UpdateUser)
 	api.Delete("/users/:id", reqOnlyBySuperuser, requireDeleteUser, userHttp.DeleteUser)
 
-	//
+	// Logout
 	api.Post("/users/logout", reqBothUserAndSuperuser, userHttp.LogoutUser)
 
+	// Department Routes
+	department := departmentimpl.NewService(s.db, s.cfg)
+	departmentHttp := rest.NewDepartmentHandler(department)
+
+	api.Post("/departments", reqOnlyBySuperuser, requireCreateUser, departmentHttp.CreateDepartment)
+	api.Get("/departments", reqBothUserAndSuperuser, requireReadUser, departmentHttp.SearchDepartment)
+	api.Get("/departments/:id", reqBothUserAndSuperuser, requireReadUser, departmentHttp.GetDepartmentByID)
+	api.Put("/departments/:id", reqOnlyBySuperuser, requireUpdateUser, departmentHttp.UpdateDepartment)
+	api.Delete("/departments/:id", reqOnlyBySuperuser, requireDeleteUser, departmentHttp.DeleteDepartment)
 }
