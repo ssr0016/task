@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/taskmanager
+RUN CGO_ENABLED=0 GOOS=linux go build -o main ./cmd/main/main.go
 
 # Start a new stage from scratch
 FROM alpine:latest
