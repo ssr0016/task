@@ -17,6 +17,7 @@ type TaskStatus int
 const (
 	TaskPending TaskStatus = iota + 1
 	TaskInProgress
+	TaskReviewing
 	TaskDone
 )
 
