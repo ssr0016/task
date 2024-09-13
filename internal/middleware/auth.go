@@ -92,6 +92,12 @@ func RequirePermission(permission string) fiber.Handler {
 			})
 		}
 
+		if !accesscontrol.HasTaskPermission(role, permission) {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error": "You do not have permission to access this resource",
+			})
+		}
+
 		return c.Next()
 	}
 }

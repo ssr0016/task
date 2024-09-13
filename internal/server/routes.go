@@ -7,6 +7,7 @@ import (
 	"task/internal/db"
 	"task/internal/identity/department/departmentimpl"
 	"task/internal/identity/protocol/rest"
+	"task/internal/identity/task/taskimpl"
 	"task/internal/identity/user/userimpl"
 	"task/internal/middleware"
 
@@ -51,7 +52,7 @@ func (s *Server) SetupRoutes() {
 	api.Post("/users", reqOnlyBySuperuser, requireCreateUser, userHttp.CreateUser)
 	api.Get("/users", reqBothUserAndSuperuser, requireReadUser, userHttp.SearchUser)
 	api.Get("/users/:id", reqBothUserAndSuperuser, requireReadUser, userHttp.GetUserByID)
-	api.Put("/users/:id", reqOnlyBySuperuser, requireUpdateUser, userHttp.UpdateUser)
+	api.Put("/users/:id", reqBothUserAndSuperuser, requireUpdateUser, userHttp.UpdateUser)
 	api.Delete("/users/:id", reqOnlyBySuperuser, requireDeleteUser, userHttp.DeleteUser)
 
 	// Logout
@@ -71,4 +72,14 @@ func (s *Server) SetupRoutes() {
 	api.Get("/users/assigned/:id/departments", reqBothUserAndSuperuser, requireReadUser, departmentHttp.GetUsersByDepartment)
 	api.Delete("/users/assigned/:id/departments", reqOnlyBySuperuser, requireUpdateUser, departmentHttp.RemoveUserFromDepartment)
 	api.Get("users/assigned/departments", reqBothUserAndSuperuser, requireReadUser, departmentHttp.SearchAllUsersByDepartment)
+
+	// Task Routes
+	task := taskimpl.NewService(s.db, s.cfg)
+	taskHttp := rest.NewTaskHandler(task)
+
+	api.Post("/tasks", reqOnlyBySuperuser, requireCreateUser, taskHttp.CreateTask)
+	api.Get("/tasks", reqBothUserAndSuperuser, requireReadUser, taskHttp.SearchTask)
+	api.Get("/tasks/:id", reqBothUserAndSuperuser, requireReadUser, taskHttp.GetTaskByID)
+	api.Put("/tasks/:id", reqBothUserAndSuperuser, requireUpdateUser, taskHttp.UpdateTask)
+	api.Delete("/tasks/:id", reqOnlyBySuperuser, requireDeleteUser, taskHttp.DeleteTask)
 }

@@ -76,6 +76,10 @@ func (s *service) GetDepartmentByID(ctx context.Context, id int) (*department.De
 		return nil, err
 	}
 
+	if result == nil {
+		return nil, department.ErrDepartmentNotFound
+	}
+
 	return result, nil
 }
 

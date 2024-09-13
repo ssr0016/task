@@ -28,7 +28,35 @@ var rolePermissions = map[string]map[string]bool{
 	},
 	RoleUser: {
 		"read":   true,
-		"update": false,
+		"update": true,
+	},
+	RoleSuperUser: {
+		"create": true,
+		"read":   true,
+		"update": true,
+		"delete": true,
+	},
+}
+
+var taskPermissions = map[string]map[string]bool{
+	RoleAdmin: {
+		"create": true,
+		"read":   true,
+		"update": true,
+		"delete": true,
+	},
+	RoleHR: {
+		"read":   true,
+		"update": true,
+	},
+	RoleManager: {
+		"create": true,
+		"read":   true,
+		"update": true,
+	},
+	RoleUser: {
+		"read":   true,
+		"update": true,
 	},
 	RoleSuperUser: {
 		"create": true,
@@ -41,6 +69,15 @@ var rolePermissions = map[string]map[string]bool{
 // Check if role has permission
 func HasPermission(role, permission string) bool {
 	perms, ok := rolePermissions[role]
+	if !ok {
+		return false
+	}
+	return perms[permission]
+}
+
+// Check if role has permission for tasks
+func HasTaskPermission(role, permission string) bool {
+	perms, ok := taskPermissions[role]
 	if !ok {
 		return false
 	}
