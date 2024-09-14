@@ -2,10 +2,13 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"task/pkg/util/jwt"
+	"time"
 
 	"task/internal/identity/accesscontrol"
+	"task/internal/identity/monitoringactivities"
 	"task/internal/identity/user"
 
 	"github.com/gofiber/fiber/v2"
@@ -98,6 +101,42 @@ func RequirePermission(permission string) fiber.Handler {
 			})
 		}
 
+		return c.Next()
+	}
+}
+
+// ActivityLoggingMiddleware logs the activity of the user
+func NewActivityLoggingMiddleware(service monitoringactivities.Service) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		// Retrieve userID from context, which is expected to be a string
+		userIDStr, ok := c.Locals("userID").(string)
+		if !ok {
+			fmt.Println("userID not found or not a string")
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "UserID not found or not a string",
+			})
+		}
+
+		// Create an activity log command
+		activityLogCommand := &monitoringactivities.CreateActivityLogCommand{
+			UserID:    userIDStr, // UserID is a string now
+			Activity:  c.Method(),
+			Action:    c.Path(),
+			Resource:  c.OriginalURL(),
+			Details:   "",                              // Add any additional details if available
+			CreatedAt: time.Now().Format(time.RFC3339), // Set current time in RFC3339 format
+		}
+
+		// Log activity
+		err := service.LogActivity(c.Context(), activityLogCommand)
+		if err != nil {
+			fmt.Printf("Error logging activity: %v\n", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Failed to log activity",
+			})
+		}
+
+		// Continue with the next middleware/handler
 		return c.Next()
 	}
 }

@@ -6,6 +6,8 @@ import (
 	"task/internal/api/response"
 	"task/internal/db"
 	"task/internal/identity/department/departmentimpl"
+	"task/internal/identity/monitoringactivities/logsmonitoring/logsmonitoringimpl"
+	"task/internal/identity/monitoringactivities/monitoringactivitiesimpl"
 	"task/internal/identity/protocol/rest"
 	"task/internal/identity/task/taskimpl"
 	"task/internal/identity/user/userimpl"
@@ -45,10 +47,16 @@ func (s *Server) SetupRoutes() {
 	user := userimpl.NewService(s.db, s.cfg)
 	userHttp := rest.NewUserHandler(user)
 
+	monitoringActivities := monitoringactivitiesimpl.NewService(s.db, s.cfg)
+	logMonitoring := logsmonitoringimpl.NewService(s.db, s.cfg)
+	monitoringActivitiesHttp := rest.NewMonitoringActivitiesHandler(monitoringActivities, logMonitoring)
+
 	api.Post("/users/register", userHttp.RegisterUser)
 	api.Post("/users/login", userHttp.LoginUser)
 
 	api.Use(middleware.JWTProtected(s.jwtSecret, user))
+	api.Use(middleware.NewActivityLoggingMiddleware(monitoringActivities))
+
 	api.Post("/users", reqOnlyBySuperuser, requireCreateUser, userHttp.CreateUser)
 	api.Get("/users", reqBothUserAndSuperuser, requireReadUser, userHttp.SearchUser)
 	api.Get("/users/:id", reqBothUserAndSuperuser, requireReadUser, userHttp.GetUserByID)
@@ -57,6 +65,10 @@ func (s *Server) SetupRoutes() {
 
 	// Logout
 	api.Post("/users/logout", reqBothUserAndSuperuser, userHttp.LogoutUser)
+
+	// Monitoring activities and logs Routes
+	api.Get("/monitoring-activities/logs", reqBothUserAndSuperuser, requireReadUser, monitoringActivitiesHttp.MonitoringLogs)
+	api.Get("/monitoring-activities", reqOnlyBySuperuser, requireReadUser, monitoringActivitiesHttp.GetMonitoringActivities)
 
 	// Department Routes
 	department := departmentimpl.NewService(s.db, s.cfg)
@@ -82,4 +94,5 @@ func (s *Server) SetupRoutes() {
 	api.Get("/tasks/:id", reqBothUserAndSuperuser, requireReadUser, taskHttp.GetTaskByID)
 	api.Put("/tasks/:id", reqBothUserAndSuperuser, requireUpdateUser, taskHttp.UpdateTask)
 	api.Delete("/tasks/:id", reqOnlyBySuperuser, requireDeleteUser, taskHttp.DeleteTask)
+
 }
