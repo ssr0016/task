@@ -10,6 +10,8 @@ var (
 	ErrInvalidTaskTitle       = errors.New("task.invalid-title", "Invalid task title")
 	ErrInvalidTaskDescription = errors.New("task.invalid-description", "Invalid task description")
 	ErrInvalidUserID          = errors.New("task.invalid-user-id", "Invalid user id")
+	ErrInvalidTaskPriority    = errors.New("task.invalid-priority", "Invalid task priority")
+	ErrInvalidTaskDifficulty  = errors.New("task.invalid-difficulty", "Invalid task difficulty")
 )
 
 type TaskStatus int
@@ -21,11 +23,25 @@ const (
 	TaskDone
 )
 
+var validPriorities = map[string]bool{
+	"low":    true,
+	"medium": true,
+	"high":   true,
+}
+
+var validDifficulty = map[string]bool{
+	"easy":   true,
+	"medium": true,
+	"hard":   true,
+}
+
 type Task struct {
 	ID          int        `db:"id" json:"id"`
 	Title       string     `db:"title" json:"title"`
 	Description string     `db:"description" json:"description"`
 	Status      TaskStatus `db:"status" json:"status"`
+	Priority    string     `db:"priority" json:"priority"`
+	Difficulty  string     `db:"difficulty" json:"difficulty"`
 	UserID      int        `db:"user_id" json:"user_id"`
 	CreatedAt   string     `db:"created_at" json:"created_at"`
 	UpdatedAt   string     `db:"updated_at" json:"updated_at"`
@@ -35,6 +51,8 @@ type CreateTaskCommand struct {
 	Title       string     `json:"title"`
 	Description string     `json:"description"`
 	Status      TaskStatus `json:"status"`
+	Priority    string     `json:"priority"`
+	Difficulty  string     `json:"difficulty"`
 	UserID      int        `json:"user_id"`
 }
 
@@ -42,6 +60,8 @@ type UpdateTaskCommand struct {
 	ID          int        `json:"id"`
 	Title       string     `json:"title"`
 	Description string     `json:"description"`
+	Priority    string     `json:"priority"`
+	Difficulty  string     `json:"difficulty"`
 	Status      TaskStatus `json:"status"`
 	UserID      int        `json:"user_id"`
 }
@@ -50,6 +70,8 @@ type SearchTaskQuery struct {
 	Title       string `query:"title"`
 	Description string `query:"description"`
 	Status      string `query:"status"`
+	Priority    string `query:"priority"`
+	Difficulty  string `query:"difficulty"`
 	UserID      int    `query:"user_id"`
 	Page        int    `query:"page"`
 	PerPage     int    `query:"per_page"`
@@ -75,6 +97,14 @@ func (cmd *CreateTaskCommand) Validate() error {
 		return ErrInvalidUserID
 	}
 
+	if !validPriorities[cmd.Priority] {
+		return ErrInvalidTaskPriority
+	}
+
+	if !validPriorities[cmd.Difficulty] {
+		return ErrInvalidTaskDifficulty
+	}
+
 	return nil
 }
 
@@ -93,6 +123,14 @@ func (cmd *UpdateTaskCommand) Validate() error {
 
 	if cmd.UserID <= 0 {
 		return ErrInvalidUserID
+	}
+
+	if !validPriorities[cmd.Priority] {
+		return ErrInvalidTaskPriority
+	}
+
+	if !validPriorities[cmd.Difficulty] {
+		return ErrInvalidTaskDifficulty
 	}
 
 	return nil

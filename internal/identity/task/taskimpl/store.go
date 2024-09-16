@@ -32,12 +32,16 @@ func (s *store) create(ctx context.Context, cmd *task.CreateTaskCommand) error {
 				title,
 				description,
 				status,
+				priority,
+				difficulty,
 				user_id
 			)VALUES (
 				$1,
 				$2,
 				$3,
-				$4
+				$4,
+				$5,
+				$6
 			) RETURNING id
 		`
 
@@ -49,6 +53,8 @@ func (s *store) create(ctx context.Context, cmd *task.CreateTaskCommand) error {
 			cmd.Title,
 			cmd.Description,
 			cmd.Status,
+			cmd.Priority,
+			cmd.Difficulty,
 			cmd.UserID,
 		).Scan(&id)
 		if err != nil {
@@ -63,13 +69,14 @@ func (s *store) update(ctx context.Context, cmd *task.UpdateTaskCommand) error {
 	return s.db.WithTransaction(ctx, func(ctx context.Context, tx db.Tx) error {
 		rawSQL := `
 			UPDATE tasks
-			SET 
+			SET
 				title = $1,
 				description = $2,
 				status = $3,
-				user_id = $4
-			WHERE
-				id = $5
+				priority = $4,
+				difficulty = $5,
+				user_id = $6
+			WHERE id = $7
 		`
 
 		_, err := tx.Exec(
@@ -78,6 +85,8 @@ func (s *store) update(ctx context.Context, cmd *task.UpdateTaskCommand) error {
 			cmd.Title,
 			cmd.Description,
 			cmd.Status,
+			cmd.Priority,
+			cmd.Difficulty,
 			cmd.UserID,
 			cmd.ID,
 		)
@@ -114,6 +123,8 @@ func (s *store) getTaskByID(ctx context.Context, id int) (*task.Task, error) {
 			title,
 			description,
 			status,
+			priority,
+			difficulty,
 			user_id,
 			created_at,
 			updated_at
@@ -144,6 +155,8 @@ func (s *store) taskTaken(ctx context.Context, id int, title string) ([]*task.Ta
 			title,
 			description,
 			status,
+			priority,
+			difficulty,
 			user_id,
 			created_at,
 			updated_at
@@ -179,6 +192,8 @@ func (s *store) search(ctx context.Context, query *task.SearchTaskQuery) (*task.
 			title,
 			description,
 			status,
+			priority,
+			difficulty,
 			user_id,
 			created_at,
 			updated_at
@@ -201,6 +216,18 @@ func (s *store) search(ctx context.Context, query *task.SearchTaskQuery) (*task.
 	if len(query.Status) > 0 {
 		whereCondition = append(whereCondition, fmt.Sprintf("status = $%d", paramIndex))
 		whereParams = append(whereParams, query.Status)
+		paramIndex++
+	}
+
+	if len(query.Priority) > 0 {
+		whereCondition = append(whereCondition, fmt.Sprintf("priority = $%d", paramIndex))
+		whereParams = append(whereParams, query.Priority)
+		paramIndex++
+	}
+
+	if len(query.Difficulty) > 0 {
+		whereCondition = append(whereCondition, fmt.Sprintf("difficulty = $%d", paramIndex))
+		whereParams = append(whereParams, query.Difficulty)
 		paramIndex++
 	}
 
