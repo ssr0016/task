@@ -121,3 +121,50 @@ func (s *service) SearchTask(ctx context.Context, query *task.SearchTaskQuery) (
 
 	return result, nil
 }
+
+func (s *service) ApprovedTask(ctx context.Context, cmd *task.ApproveTaskCommand) error {
+	taskData, err := s.store.getTaskByID(ctx, cmd.TaskID)
+	if err != nil || taskData == nil {
+		return task.ErrTaskNotFound
+	}
+
+	isSuperuser, err := s.store.isSuperuserOrDefaultUser(ctx, taskData.UserID)
+	if err != nil || !isSuperuser {
+		return task.ErrOnlySuperuserCanApproveTheTask
+	}
+
+	if taskData.Status != task.TaskReviewing {
+		return task.TaskIsNotReadyForApproval
+	}
+
+	taskData.Status = task.TaskDone
+	err = s.store.updateStatus(ctx, cmd.TaskID, int(task.TaskDone))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *service) SubmitTask(ctx context.Context, cmd *task.SubmitTaskCommand) error {
+	taskData, err := s.store.getTaskByID(ctx, cmd.TaskID)
+	if err != nil || taskData == nil {
+		return task.ErrTaskNotFound
+	}
+
+	if taskData.UserID != cmd.UserID {
+		return task.ErrOnlyAssignedUserCanSubmitTheTask
+	}
+
+	if taskData.Status != task.TaskPending {
+		return task.TaskIsNotPending
+	}
+
+	taskData.Status = task.TaskReviewing
+	err = s.store.updateStatus(ctx, cmd.TaskID, int(task.TaskReviewing))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

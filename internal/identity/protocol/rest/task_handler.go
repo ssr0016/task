@@ -99,3 +99,38 @@ func (h *taskHandler) SearchTask(ctx *fiber.Ctx) error {
 		"tasks": result,
 	})
 }
+
+func (h *taskHandler) SubmitTask(ctx *fiber.Ctx) error {
+	var cmd task.SubmitTaskCommand
+
+	if err := ctx.BodyParser(&cmd); err != nil {
+		return errors.ErrorBadRequest(err)
+	}
+
+	if err := h.s.SubmitTask(ctx.Context(), &cmd); err != nil {
+		return errors.ErrorInternalServerError(err)
+	}
+
+	return response.Ok(ctx, fiber.Map{
+		"message": "task submitted successfully!",
+		"task_id": cmd.TaskID,
+	})
+}
+
+func (h *taskHandler) ApprovedTask(ctx *fiber.Ctx) error {
+	var cmd task.ApproveTaskCommand
+
+	if err := ctx.BodyParser(&cmd); err != nil {
+		return errors.ErrorBadRequest(err)
+	}
+
+	err := h.s.ApprovedTask(ctx.Context(), &cmd)
+	if err != nil {
+		return errors.ErrorInternalServerError(err)
+	}
+
+	return response.Ok(ctx, fiber.Map{
+		"message": "task approved successfully!",
+		"task_id": cmd.TaskID,
+	})
+}

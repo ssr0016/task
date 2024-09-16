@@ -270,3 +270,39 @@ func (s *store) getCount(ctx context.Context, sql bytes.Buffer, whereParams []in
 
 	return count, nil
 }
+
+func (s *store) updateStatus(ctx context.Context, taskID, status int) error {
+	return s.db.WithTransaction(ctx, func(ctx context.Context, tx db.Tx) error {
+		rawSQL := `
+			UPDATE
+				tasks
+			SET
+				status = $1,
+				updated_at = now()
+			WHERE
+				id = $2
+		`
+
+		_, err := tx.Exec(ctx, rawSQL, status, taskID)
+		return err
+	})
+}
+
+func (s *store) isSuperuserOrDefaultUser(ctx context.Context, userID int) (bool, error) {
+	var role string
+
+	rawSQL := `
+		SELECT
+			role
+		FROM
+			users
+		WHERE
+			id = $1
+	`
+	err := s.db.Get(ctx, &role, rawSQL, userID)
+	if err != nil {
+		return false, err
+	}
+
+	return role == "superuser" || role == "user", nil
+}

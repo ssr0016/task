@@ -95,4 +95,6 @@ func (s *Server) SetupRoutes() {
 	api.Put("/tasks/:id", reqBothUserAndSuperuser, requireUpdateUser, taskHttp.UpdateTask)
 	api.Delete("/tasks/:id", reqOnlyBySuperuser, requireDeleteUser, taskHttp.DeleteTask)
 
+	api.Post("/tasks/:id/submit", reqBothUserAndSuperuser, requireUpdateUser, taskHttp.SubmitTask)
+	api.Post("/tasks/:id/approved", reqOnlyBySuperuser, requireUpdateUser, taskHttp.ApprovedTask)
 }

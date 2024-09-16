@@ -5,20 +5,24 @@ import (
 )
 
 var (
-	ErrTaskAlreadyExists      = errors.New("task.already-exists", "Task already exists")
-	ErrTaskNotFound           = errors.New("task.not-found", "Task not found")
-	ErrInvalidTaskTitle       = errors.New("task.invalid-title", "Invalid task title")
-	ErrInvalidTaskDescription = errors.New("task.invalid-description", "Invalid task description")
-	ErrInvalidUserID          = errors.New("task.invalid-user-id", "Invalid user id")
-	ErrInvalidTaskPriority    = errors.New("task.invalid-priority", "Invalid task priority")
-	ErrInvalidTaskDifficulty  = errors.New("task.invalid-difficulty", "Invalid task difficulty")
+	ErrTaskAlreadyExists                = errors.New("task.already-exists", "Task already exists")
+	ErrTaskNotFound                     = errors.New("task.not-found", "Task not found")
+	ErrInvalidTaskTitle                 = errors.New("task.invalid-title", "Invalid task title")
+	ErrInvalidTaskDescription           = errors.New("task.invalid-description", "Invalid task description")
+	ErrInvalidUserID                    = errors.New("task.invalid-user-id", "Invalid user id")
+	ErrInvalidTaskPriority              = errors.New("task.invalid-priority", "Invalid task priority")
+	ErrInvalidTaskDifficulty            = errors.New("task.invalid-difficulty", "Invalid task difficulty")
+	ErrOnlySuperuserCanApproveTheTask   = errors.New("task.only-superuser-can-approve-the-task", "Only superuser can approve the task")
+	TaskIsNotReadyForApproval           = errors.New("task.is-not-ready-for-approval", "Task is not ready for approval")
+	ErrOnlyAssignedUserCanSubmitTheTask = errors.New("task.only-assigned-user-can-submit-the-task", "Only assigned user can submit the task")
+	TaskIsNotReadyForSubmission         = errors.New("task.is-not-ready-for-submission", "Task is not ready for submission")
+	TaskIsNotPending                    = errors.New("task.is-not-pending", "Task is not pending")
 )
 
 type TaskStatus int
 
 const (
 	TaskPending TaskStatus = iota + 1
-	TaskInProgress
 	TaskReviewing
 	TaskDone
 )
@@ -29,7 +33,7 @@ var validPriorities = map[string]bool{
 	"high":   true,
 }
 
-var validDifficulty = map[string]bool{
+var validDifficulties = map[string]bool{
 	"easy":   true,
 	"medium": true,
 	"hard":   true,
@@ -84,6 +88,16 @@ type SearchTaskResult struct {
 	PerPage    int     `json:"per_page"`
 }
 
+type SubmitTaskCommand struct {
+	TaskID int `json:"task_id"`
+	UserID int `json:"user_id"`
+}
+
+type ApproveTaskCommand struct {
+	TaskID int `json:"task_id"`
+	UserID int `json:"user_id"`
+}
+
 func (cmd *CreateTaskCommand) Validate() error {
 	if len(cmd.Title) == 0 || len(cmd.Title) <= 2 {
 		return ErrInvalidTaskTitle
@@ -101,7 +115,7 @@ func (cmd *CreateTaskCommand) Validate() error {
 		return ErrInvalidTaskPriority
 	}
 
-	if !validPriorities[cmd.Difficulty] {
+	if !validDifficulties[cmd.Difficulty] {
 		return ErrInvalidTaskDifficulty
 	}
 
@@ -129,7 +143,7 @@ func (cmd *UpdateTaskCommand) Validate() error {
 		return ErrInvalidTaskPriority
 	}
 
-	if !validPriorities[cmd.Difficulty] {
+	if !validDifficulties[cmd.Difficulty] {
 		return ErrInvalidTaskDifficulty
 	}
 
